@@ -29,6 +29,49 @@ There are 8 writable registers, and 15 registers in total. Each register is repr
 ## Instructions
 Instructions and their arguments are exactly **4 bytes** in total - that is, the minimum value is `0x00000000` and the maximum value is `0xFFFFFFFF`.
 
+## Programming on rPeANUt
+
+Here are some examples of programs written in rPeANUt assembly, in a more easily referenced form than Eric's slides.
+
+### Recursive function
+
+```
+;  Main program
+0x0100:
+	load #4 R0 ; we want to calculate factorial of 4
+	push R2; push a space for the return value
+	push R0; push our argument
+	call fact
+	pop R0; pop our argument out
+	pop R2; pop the result out
+	halt
+
+
+; stack frame
+; return address #0
+; x #-1
+; result #-2
+fact:
+	load SP #-1 R0 ; place x into R0
+	jumpz R0 factif ; if x != 0 {
+	
+	sub R0 ONE R2
+	push R7
+	push R2
+	
+	call fact
+	pop R2
+	pop R7
+
+	load SP #-1 R0
+	mult R0 R7 R6
+	store R6 #-2 SP
+	return
+factif :
+	store ONE #-2 SP
+	return
+```
+
 ## Footnotes
 
 1. I'm _reasonably_ sure that the instruction register can't be referenced in an instruction. The specification doesn't give them a half-byte reference, so I'm assuming that there's no way to read to or write from this register.
